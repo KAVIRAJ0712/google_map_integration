@@ -1,0 +1,237 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "creation": "2026-10-15 11:11:08.956539",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "google_maps_settings_section",
+  "enabled",
+  "google_maps_api_key",
+  "map_id",
+  "map_column_break",
+  "map_type",
+  "default_zoom",
+  "default_latitude",
+  "default_longitude",
+  "tracking_section",
+  "location_tracking_interval",
+  "max_accuracy_meters",
+  "require_hrms_checkin",
+  "tracking_column_break",
+  "tracking_gap_minutes",
+  "last_known_max_age_minutes",
+  "missing_checkout_grace_minutes",
+  "analysis_section",
+  "stop_radius_meters",
+  "stop_min_dwell_minutes",
+  "analysis_column_break",
+  "enable_estimated_road_route",
+  "privacy_section",
+  "location_retention_days",
+  "tracking_notice",
+  "notice_version"
+ ],
+ "fields": [
+  {
+   "fieldname": "google_maps_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Google Maps"
+  },
+  {
+   "default": "0",
+   "description": "Turns the map and location tracking on for the site. Each HD Team opts in separately.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "description": "Browser key. In Google Cloud, restrict it to this site's URLs and to the Maps JavaScript API.",
+   "fieldname": "google_maps_api_key",
+   "fieldtype": "Password",
+   "label": "Maps JavaScript API Key",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "default": "12",
+   "description": "0 shows the whole world, 22 a single building.",
+   "fieldname": "default_zoom",
+   "fieldtype": "Int",
+   "label": "Default Zoom",
+   "non_negative": 1
+  },
+  {
+   "default": "60",
+   "description": "Time between location pings, from 15 to 3600. A team can set its own interval.",
+   "fieldname": "location_tracking_interval",
+   "fieldtype": "Int",
+   "label": "Tracking Interval (Seconds)",
+   "non_negative": 1
+  },
+  {
+   "default": "90",
+   "description": "Location logs older than this are deleted every day.",
+   "fieldname": "location_retention_days",
+   "fieldtype": "Int",
+   "label": "Keep Location Logs (Days)",
+   "non_negative": 1
+  },
+  {
+   "description": "Needed for map markers. DEMO_MAP_ID works for development; create a Map ID in Google Cloud for production.",
+   "fieldname": "map_id",
+   "fieldtype": "Data",
+   "label": "Map ID",
+   "mandatory_depends_on": "eval:doc.enabled"
+  },
+  {
+   "fieldname": "map_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "roadmap",
+   "fieldname": "map_type",
+   "fieldtype": "Select",
+   "label": "Default Map Type",
+   "options": "roadmap\nsatellite\nhybrid\nterrain"
+  },
+  {
+   "fieldname": "default_latitude",
+   "fieldtype": "Float",
+   "label": "Default Latitude",
+   "precision": "7"
+  },
+  {
+   "description": "Where the map opens when there is no location data.",
+   "fieldname": "default_longitude",
+   "fieldtype": "Float",
+   "label": "Default Longitude",
+   "precision": "7"
+  },
+  {
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Location Tracking"
+  },
+  {
+   "default": "100",
+   "description": "Readings less precise than this are kept but marked as low accuracy and left out of routes.",
+   "fieldname": "max_accuracy_meters",
+   "fieldtype": "Float",
+   "label": "Maximum Accuracy Radius (Meters)",
+   "non_negative": 1
+  },
+  {
+   "default": "1",
+   "description": "Tracking can start only after the agent checks in through HRMS, and it stops at check-out.",
+   "fieldname": "require_hrms_checkin",
+   "fieldtype": "Check",
+   "label": "Require HRMS Check-in"
+  },
+  {
+   "fieldname": "tracking_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "10",
+   "description": "A session with no location ping for this long is marked as interrupted.",
+   "fieldname": "tracking_gap_minutes",
+   "fieldtype": "Int",
+   "label": "Gap Before Interruption (Minutes)",
+   "non_negative": 1
+  },
+  {
+   "default": "15",
+   "description": "When a ticket is resolved, a last known location older than this is reported as unavailable.",
+   "fieldname": "last_known_max_age_minutes",
+   "fieldtype": "Int",
+   "label": "Last Known Location Age (Minutes)",
+   "non_negative": 1
+  },
+  {
+   "default": "120",
+   "description": "Time after the shift ends before an open session is closed as a missing check-out.",
+   "fieldname": "missing_checkout_grace_minutes",
+   "fieldtype": "Int",
+   "label": "Missing Check-out Grace (Minutes)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "analysis_section",
+   "fieldtype": "Section Break",
+   "label": "Route and Stop Analysis"
+  },
+  {
+   "default": "75",
+   "description": "Pings within this distance of each other count as one stop.",
+   "fieldname": "stop_radius_meters",
+   "fieldtype": "Int",
+   "label": "Stop Radius (Meters)",
+   "non_negative": 1
+  },
+  {
+   "default": "10",
+   "fieldname": "stop_min_dwell_minutes",
+   "fieldtype": "Int",
+   "label": "Minimum Stop Duration (Minutes)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "analysis_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Uses the Google Routes API. Shown as an estimate, separate from the recorded GPS path.",
+   "fieldname": "enable_estimated_road_route",
+   "fieldtype": "Check",
+   "label": "Show Estimated Road Route"
+  },
+  {
+   "fieldname": "privacy_section",
+   "fieldtype": "Section Break",
+   "label": "Privacy"
+  },
+  {
+   "default": "When you start tracking, your device location is recorded at regular intervals until you stop tracking or check out. Your managers and HR can see your route and where you resolved tickets. Location logs are deleted after the retention period set by your company.",
+   "description": "Shown to agents before tracking starts: what is collected, when, and who can see it.",
+   "fieldname": "tracking_notice",
+   "fieldtype": "Small Text",
+   "label": "Tracking Notice"
+  },
+  {
+   "default": "1",
+   "description": "Goes up when the notice changes, so agents acknowledge it again.",
+   "fieldname": "notice_version",
+   "fieldtype": "Int",
+   "label": "Notice Version",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-15 12:44:40.609932",
+ "modified_by": "Administrator",
+ "module": "Google Map Integration",
+ "name": "Google Maps Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

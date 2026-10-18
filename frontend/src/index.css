@@ -1,0 +1,23 @@
+@import "frappe-ui/style.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+	.field-label {
+		@apply flex flex-col gap-1 text-xs text-ink-gray-6;
+	}
+	.field-input {
+		@apply h-8 rounded-4 border border-outline-gray-2 bg-surface-base px-2 text-sm text-ink-gray-9;
+	}
+	.card {
+		@apply rounded-6 border border-outline-gray-2 bg-surface-base p-4;
+	}
+	.notice-error {
+		@apply rounded-6 bg-surface-red-1 p-3 text-sm text-ink-red-6;
+	}
+	.notice-warning {
+		@apply rounded-6 bg-surface-amber-1 p-3 text-sm text-ink-amber-8;
+	}
+}

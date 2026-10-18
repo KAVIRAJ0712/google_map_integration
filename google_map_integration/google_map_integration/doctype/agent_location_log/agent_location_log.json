@@ -1,0 +1,246 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "autoincrement",
+ "creation": "2026-10-15 13:04:01.389905",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "agent_location_log_section",
+  "event_type",
+  "recorded_at",
+  "event_column_break",
+  "agent",
+  "employee",
+  "hd_team",
+  "daily_tracking",
+  "session_id",
+  "client_event_id",
+  "location_section",
+  "location_status",
+  "latitude",
+  "longitude",
+  "accuracy_meters",
+  "location_column_break",
+  "source",
+  "validation_status",
+  "note",
+  "ticket_section",
+  "ticket",
+  "ticket_resolved_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "agent_location_log_section",
+   "fieldtype": "Section Break",
+   "label": "Event"
+  },
+  {
+   "fieldname": "daily_tracking",
+   "fieldtype": "Link",
+   "label": "Daily Tracking",
+   "options": "Agent Daily Tracking",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Agent",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "hd_team",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "HD Team",
+   "options": "HD Team",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ticket",
+   "fieldtype": "Link",
+   "label": "Ticket",
+   "options": "HD Ticket",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "event_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Event Type",
+   "options": "Location Ping\nCheck-in\nCheck-out\nTicket Resolved",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude",
+   "precision": "7",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude",
+   "precision": "7",
+   "read_only": 1
+  },
+  {
+   "description": "When the device read the location, or when the event happened.",
+   "fieldname": "recorded_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Recorded At",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "session_id",
+   "fieldtype": "Data",
+   "label": "Session ID",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Source",
+   "options": "\nBrowser GPS\nHRMS Check-in\nManual\nOther approved source",
+   "read_only": 1
+  },
+  {
+   "fieldname": "event_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "client_event_id",
+   "fieldtype": "Data",
+   "label": "Client Event ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "default": "GPS",
+   "description": "GPS: read at this time. Last Known: an earlier reading reused for this event. Unavailable: no location.",
+   "fieldname": "location_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Location Status",
+   "options": "GPS\nLast Known\nUnavailable",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "accuracy_meters",
+   "fieldtype": "Float",
+   "label": "Accuracy (Meters)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "location_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Valid",
+   "fieldname": "validation_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Validation Status",
+   "options": "Valid\nLow Accuracy\nRejected",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.event_type=='Ticket Resolved'",
+   "fieldname": "ticket_section",
+   "fieldtype": "Section Break",
+   "label": "Ticket"
+  },
+  {
+   "description": "The ticket's own resolution time, kept separate from when the location was read.",
+   "fieldname": "ticket_resolved_at",
+   "fieldtype": "Datetime",
+   "label": "Ticket Resolved At",
+   "read_only": 1
+  },
+  {
+   "description": "Why a reading was rejected, or why tracking stopped.",
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-18 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Google Map Integration",
+ "name": "Agent Location Log",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agent Manager"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "HR User"
+  },
+  {
+   "read": 1,
+   "role": "Agent"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "recorded_at",
+ "sort_order": "DESC",
+ "states": []
+}

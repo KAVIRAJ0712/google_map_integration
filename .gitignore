@@ -53,3 +53,7 @@ jspm_packages/
 
 # Aider AI Chat
 .aider*
+
+# Built frontend; bench build creates it
+google_map_integration/public/frontend
+google_map_integration/www/agent-tracking.html

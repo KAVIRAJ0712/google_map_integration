@@ -1,0 +1,263 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "autoincrement",
+ "creation": "2026-10-15 13:04:00.720412",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "agent_daily_tracking_section",
+  "employee",
+  "employee_name",
+  "user",
+  "hd_team",
+  "agent_column_break",
+  "attendance_date",
+  "status",
+  "attendance",
+  "shift_section",
+  "shift",
+  "shift_start",
+  "shift_column_break",
+  "shift_end",
+  "checkin_section",
+  "checkin_time",
+  "checkin_column_break",
+  "checkout_time",
+  "tracking_section",
+  "session_id",
+  "tracking_started_at",
+  "tracking_ended_at",
+  "last_location_at",
+  "tracking_column_break",
+  "interruption_reason",
+  "tracking_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "agent_daily_tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Agent"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "User",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "hd_team",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "HD Team",
+   "options": "HD Team",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attendance_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Attendance Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "tracking_started_at",
+   "fieldtype": "Datetime",
+   "label": "Tracking Started At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tracking_ended_at",
+   "fieldtype": "Datetime",
+   "label": "Tracking Ended At",
+   "read_only": 1
+  },
+  {
+   "default": "Not Started",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Not Started\nActive\nInterrupted\nCompleted\nMissing Checkout",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agent_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Linked once HRMS marks attendance for this day.",
+   "fieldname": "attendance",
+   "fieldtype": "Link",
+   "label": "Attendance",
+   "options": "Attendance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_section",
+   "fieldtype": "Section Break",
+   "label": "Shift"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "label": "Shift",
+   "options": "Shift Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_start",
+   "fieldtype": "Datetime",
+   "label": "Shift Start",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift_end",
+   "fieldtype": "Datetime",
+   "label": "Shift End",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checkin_section",
+   "fieldtype": "Section Break",
+   "label": "Check-in and Check-out"
+  },
+  {
+   "fieldname": "checkin_time",
+   "fieldtype": "Datetime",
+   "label": "Check-in Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checkin_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "checkout_time",
+   "fieldtype": "Datetime",
+   "label": "Check-out Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "session_id",
+   "fieldtype": "Data",
+   "label": "Current Session ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_location_at",
+   "fieldtype": "Datetime",
+   "label": "Last Location Received At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tracking_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "interruption_reason",
+   "fieldtype": "Select",
+   "label": "Interruption Reason",
+   "options": "\nLocation Permission Denied\nNo Location Received\nTracking Turned Off\nNo Check-out",
+   "read_only": 1
+  },
+  {
+   "description": "Employee, attendance date and shift; keeps one record per shift.",
+   "fieldname": "tracking_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tracking Key",
+   "no_copy": 1,
+   "read_only": 1,
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-18 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Google Map Integration",
+ "name": "Agent Daily Tracking",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agent Manager"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "HR User"
+  },
+  {
+   "read": 1,
+   "role": "Agent"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "attendance_date",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
+ "track_changes": 1
+}

@@ -8,18 +8,24 @@ app_license = "mit"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ["frappe/helpdesk", "frappe/hrms"]
 
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "google_map_integration",
-# 		"logo": "/assets/google_map_integration/logo.png",
-# 		"title": "Google Map Integration",
-# 		"route": "/google_map_integration",
-# 		"has_permission": "google_map_integration.api.permission.has_app_permission"
-# 	}
-# ]
+require_type_annotated_api_methods = True
+
+# Shown in the apps menu, which Helpdesk's sidebar also lists
+add_to_apps_screen = [
+	{
+		"name": "google_map_integration",
+		"logo": "/assets/google_map_integration/frontend/logo.svg",
+		"title": "Agent Tracking",
+		"route": "/agent-tracking",
+		"has_permission": "google_map_integration.api.config.can_open_app",
+	}
+]
+
+website_route_rules = [
+	{"from_route": "/agent-tracking/<path:app_path>", "to_route": "agent-tracking"},
+]
 
 # Includes in <head>
 # ------------------
@@ -132,46 +138,50 @@ app_license = "mit"
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+permission_query_conditions = {
+	"Agent Daily Tracking": "google_map_integration.tracking.permissions.daily_tracking_query",
+	"Agent Location Log": "google_map_integration.tracking.permissions.location_log_query",
+}
+
+has_permission = {
+	"Agent Daily Tracking": "google_map_integration.tracking.permissions.has_permission",
+	"Agent Location Log": "google_map_integration.tracking.permissions.has_permission",
+}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"HD Team": {
+		"validate": "google_map_integration.tracking.config.validate_team_settings",
+	},
+	"Employee Checkin": {
+		"after_insert": "google_map_integration.integrations.hrms.on_checkin_insert",
+		"on_trash": "google_map_integration.integrations.hrms.on_checkin_trash",
+	},
+	"Attendance": {
+		"on_submit": "google_map_integration.integrations.hrms.on_attendance_submit",
+		"on_cancel": "google_map_integration.integrations.hrms.on_attendance_cancel",
+	},
+	"HD Ticket": {
+		"on_update": "google_map_integration.integrations.helpdesk.on_ticket_update",
+	},
+}
+
+# Tracking records must never stop HR or Helpdesk from deleting a check-in, an employee or a ticket
+ignore_links_on_delete = ["Agent Daily Tracking", "Agent Location Log"]
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"google_map_integration.tasks.all"
-# 	],
-# 	"daily": [
-# 		"google_map_integration.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"google_map_integration.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"google_map_integration.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"google_map_integration.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"cron": {
+		"*/5 * * * *": ["google_map_integration.tracking.tasks.mark_interrupted_sessions"],
+	},
+	"hourly": ["google_map_integration.tracking.tasks.close_missing_checkouts"],
+	"daily_long": ["google_map_integration.tracking.tasks.purge_old_locations"],
+}
 
 # Testing
 # -------
@@ -261,4 +271,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-
