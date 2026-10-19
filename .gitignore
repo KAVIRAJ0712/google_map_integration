@@ -57,3 +57,6 @@ jspm_packages/
 # Built frontend; bench build creates it
 google_map_integration/public/frontend
 google_map_integration/www/agent-tracking.html
+
+# Test files Frappe creates when a DocType is saved in developer mode; this app keeps no tests
+google_map_integration/google_map_integration/doctype/*/test_*.py

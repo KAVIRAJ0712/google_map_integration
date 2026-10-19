@@ -99,15 +99,10 @@ def get_tracking_interval(settings, teams: list) -> int:
 
 def get_map_options(settings) -> dict:
 	"""Everything the browser needs to draw a map, including the browser key."""
-	center = None
-	if flt(settings.default_latitude) or flt(settings.default_longitude):
-		center = {"lat": flt(settings.default_latitude), "lng": flt(settings.default_longitude)}
 	return {
 		"api_key": get_api_key(),
 		"map_id": settings.map_id,
 		"map_type": settings.map_type or "roadmap",
-		"default_zoom": cint(settings.default_zoom),
-		"default_center": center,
 		"show_estimated_road_route": bool(settings.enable_estimated_road_route),
 	}
 

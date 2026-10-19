@@ -147,6 +147,55 @@ def get_tracking_days(user: str, agent: str, from_date: str, to_date: str) -> li
 	]
 
 
+def get_team_routes(user: str, date: str, team: str | None = None, agent: str | None = None) -> list[dict]:
+	"""The route of every agent the user may see on one day, to draw them on one map."""
+	scope = get_scope(user)
+	days = frappe.get_list(
+		DAY,
+		filters={
+			"attendance_date": getdate(date),
+			"hd_team": ["in", [allowed(team, scope.teams, _("team"))] if team else scope.teams],
+			"user": allowed(agent, scope.agents, _("agent")) if agent else ["in", scope.agents],
+		},
+		fields=["name", "user"],
+		order_by="user asc",
+	)
+	if not days:
+		return []
+
+	pings = {}
+	for log in frappe.get_all(
+		LOG,
+		filters={
+			"daily_tracking": ["in", [day.name for day in days]],
+			"event_type": "Location Ping",
+			"validation_status": "Valid",
+		},
+		fields=LOG_FIELDS,
+	):
+		pings.setdefault(cint(log.daily_tracking), []).append(log)
+	gap_seconds = cint(config.get_settings().tracking_gap_minutes) * 60
+	names = full_names(day.user for day in days)
+
+	routes = []
+	for day in days:
+		points = analytics.drop_spikes(analytics.route_points(pings.get(cint(day.name), [])))
+		if not points:
+			continue
+		routes.append(
+			{
+				"agent": day.user,
+				"agent_name": names.get(day.user),
+				"daily_tracking": cint(day.name),
+				"segments": [
+					[{"lat": point.lat, "lng": point.lng, "t": epoch(point.t)} for point in segment]
+					for segment in analytics.split_segments(points, gap_seconds)
+				],
+			}
+		)
+	return routes
+
+
 def get_day_summary(user: str, daily_tracking: int) -> dict:
 	"""The route, stops, gaps, events and figures of one tracking day."""
 	scope = get_scope(user)

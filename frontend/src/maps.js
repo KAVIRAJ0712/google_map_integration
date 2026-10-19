@@ -46,8 +46,21 @@ export const EVENT_STYLES = {
 	"Check-out": { color: "#4b5563", label: "Out" },
 	"Ticket Resolved": { color: "#2563eb", label: "T" },
 	"Location Ping": { color: "#0891b2", label: "" },
-	Stop: { color: "#d97706", label: "P" },
 };
+
+// Numbered stops of a day: the first green, the last red, the ones between grey
+export const STOP_COLORS = { first: "#16a34a", middle: "#64748b", last: "#dc2626" };
+
+// One colour per agent when several agents' routes share the map
+export const ROUTE_COLORS = ["#2563eb", "#ea580c", "#9333ea", "#0d9488", "#db2777", "#ca8a04", "#4f46e5", "#65a30d"];
+
+// A teardrop pin with a short label, its tip on the location
+export function pinElement(text, color) {
+	const element = document.createElement("div");
+	element.style.cssText = "filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))";
+	element.innerHTML = `<svg width="28" height="38" viewBox="0 0 28 38" aria-hidden="true"><path d="M14 1C6.8 1 1 6.7 1 13.8 1 23.5 14 37 14 37s13-13.5 13-23.2C27 6.7 21.2 1 14 1z" fill="${color}" stroke="#fff" stroke-width="2"/><text x="14" y="18" text-anchor="middle" fill="#fff" style="font:600 12px system-ui,sans-serif">${escapeHtml(text)}</text></svg>`;
+	return element;
+}
 
 // Content for an AdvancedMarkerElement. Last known locations are drawn faded and dashed, so an
 // earlier reading is never mistaken for one taken at the event.

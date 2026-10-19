@@ -42,7 +42,7 @@
 			<label class="field-label">
 				Tracking day
 				<select v-model="filters.daily_tracking" class="field-input" :disabled="!days.length">
-					<option value="">{{ days.length ? "Choose a day for its route" : "Choose an agent" }}</option>
+					<option value="">{{ daysHint }}</option>
 					<option v-for="day in days" :key="day.name" :value="day.name">
 						{{ day.attendance_date }} · {{ day.status }}
 					</option>
@@ -74,13 +74,32 @@
 					@focus="focus"
 					@toggle-road-route="toggleRoadRoute"
 				/>
-				<LogTable
-					v-else
-					:result="logs"
-					:loaded="logsLoaded"
-					@page="load"
-					@focus="(row) => focus(row, logHtml(row))"
-				/>
+				<template v-else>
+					<section v-if="teamRoutes.length" class="border-b border-outline-gray-2 p-3 text-sm">
+						<h3 class="mb-1 font-semibold">Routes on {{ filters.from_date }}</h3>
+						<p class="mb-2 text-xs text-ink-gray-6">
+							One colour per agent. The pin with their initials is their last reading.
+						</p>
+						<ul class="flex flex-col">
+							<li v-for="route in teamRoutes" :key="route.daily_tracking">
+								<button
+									type="button"
+									class="flex w-full items-center gap-2 rounded-4 px-1 py-1 text-left hover:bg-surface-gray-1"
+									@click="fit(routePoints(route))"
+								>
+									<span class="size-3 shrink-0 rounded-full" :style="{ background: route.color }" />
+									{{ route.agent_name || route.agent }}
+								</button>
+							</li>
+						</ul>
+					</section>
+					<LogTable
+						:result="logs"
+						:loaded="logsLoaded"
+						@page="load"
+						@focus="(row) => focus(row, logHtml(row))"
+					/>
+				</template>
 			</aside>
 		</div>
 	</div>
@@ -92,7 +111,15 @@ import { Button } from "frappe-ui";
 import { get } from "@/api";
 import { config } from "@/config";
 import { formatDateTime, formatDuration, today } from "@/format";
-import { escapeHtml, loadGoogleMaps, markerElement, onMapsAuthFailure } from "@/maps";
+import {
+	ROUTE_COLORS,
+	STOP_COLORS,
+	escapeHtml,
+	loadGoogleMaps,
+	markerElement,
+	onMapsAuthFailure,
+	pinElement,
+} from "@/maps";
 import { usePlayback } from "@/playback";
 import DayPanel from "@/components/DayPanel.vue";
 import LogTable from "@/components/LogTable.vue";
@@ -111,8 +138,10 @@ const filters = reactive({
 	include_low_accuracy: true,
 });
 const days = ref([]);
+const daysLoading = ref(false);
 const logs = ref({ rows: [], page: 1, has_more: false, agent_names: {} });
 const logsLoaded = ref(false);
+const teamRoutes = ref([]);
 const summary = ref(null);
 const loading = ref(false);
 const error = ref("");
@@ -145,8 +174,9 @@ async function initMap() {
 		]);
 		maps = { ...core, ...mapsLibrary, ...marker };
 		map = new maps.Map(mapElement.value, {
-			center: settings.default_center || { lat: 0, lng: 0 },
-			zoom: settings.default_center ? settings.default_zoom : 2,
+			// the whole world until the data shown zooms the map to it
+			center: { lat: 0, lng: 0 },
+			zoom: 2,
 			mapId: settings.map_id,
 			mapTypeId: settings.map_type,
 			streetViewControl: false,
@@ -168,10 +198,18 @@ async function loadOptions() {
 
 watch(() => [filters.agent, filters.from_date, filters.to_date], loadDays);
 
+// Tracking days belong to one agent, so the list waits for an agent to be chosen
+const daysHint = computed(() => {
+	if (!filters.agent) return "Choose an agent first";
+	if (daysLoading.value) return "Loading days…";
+	return days.value.length ? "Choose a day for its route" : "No tracking days in these dates";
+});
+
 async function loadDays() {
 	filters.daily_tracking = "";
 	days.value = [];
 	if (!filters.agent || !filters.from_date || !filters.to_date) return;
+	daysLoading.value = true;
 	try {
 		days.value = await get(`${API}.get_tracking_days`, {
 			agent: filters.agent,
@@ -180,6 +218,8 @@ async function loadDays() {
 		});
 	} catch (e) {
 		error.value = e.message;
+	} finally {
+		daysLoading.value = false;
 	}
 }
 
@@ -189,11 +229,19 @@ async function load(page = 1) {
 	try {
 		if (filters.daily_tracking) {
 			summary.value = await get(`${API}.get_day_summary`, { daily_tracking: filters.daily_tracking });
+			teamRoutes.value = [];
 			drawDay();
 		} else {
 			summary.value = null;
 			const { daily_tracking, ...rest } = filters;
-			logs.value = await get(`${API}.get_location_logs`, { ...rest, page, page_length: 200 });
+			const [result, routes] = await Promise.all([
+				get(`${API}.get_location_logs`, { ...rest, page, page_length: 200 }),
+				showsRoutes()
+					? get(`${API}.get_team_routes`, { date: filters.from_date, team: filters.team, agent: filters.agent })
+					: [],
+			]);
+			logs.value = result;
+			teamRoutes.value = withColors(routes);
 			logsLoaded.value = true;
 			drawLogs();
 		}
@@ -204,10 +252,43 @@ async function load(page = 1) {
 	}
 }
 
+// Routes are drawn for one day at a time, and not while looking for other events or a ticket
+function showsRoutes() {
+	return (
+		filters.from_date === filters.to_date &&
+		!filters.ticket &&
+		(!filters.event_type || filters.event_type === "Location Ping")
+	);
+}
+
+function withColors(routes) {
+	const agents = [...new Set(routes.map((route) => route.agent))];
+	return routes.map((route) => ({
+		...route,
+		color: ROUTE_COLORS[agents.indexOf(route.agent) % ROUTE_COLORS.length],
+	}));
+}
+
 function drawLogs() {
 	if (!map) return;
 	clearMap();
-	const located = logs.value.rows.filter((row) => row.latitude !== null);
+	for (const route of teamRoutes.value) {
+		drawRoute(route.segments, route.color);
+		const last = route.segments.at(-1).at(-1);
+		addMarker(position(last), "Location Ping", {
+			content: pinElement(initials(route.agent_name || route.agent), route.color),
+			title: route.agent_name || route.agent,
+			html: lastReadingHtml(route, last),
+			zIndex: 20,
+		});
+	}
+	// a drawn route already shows the valid readings it is made of
+	const routed = new Set(teamRoutes.value.map((route) => route.daily_tracking));
+	const located = logs.value.rows.filter(
+		(row) =>
+			row.latitude !== null &&
+			!(row.event_type === "Location Ping" && row.validation_status === "Valid" && routed.has(row.daily_tracking))
+	);
 	for (const row of located) {
 		addMarker(position(row), row.event_type, {
 			lastKnown: row.location_status === "Last Known",
@@ -215,25 +296,21 @@ function drawLogs() {
 			zIndex: row.event_type === "Location Ping" ? 1 : 10,
 		});
 	}
-	fit(located.map(position));
+	fit([...teamRoutes.value.flatMap(routePoints), ...located.map(position)]);
 }
 
 function drawDay() {
 	if (!map) return;
 	clearMap();
 	const { segments, stops, events } = summary.value;
-	for (const segment of segments) {
-		const line = new maps.Polyline({
-			map,
-			path: segment.map(position),
-			strokeColor: "#2563eb",
-			strokeOpacity: 0.85,
-			strokeWeight: 4,
-		});
-		overlays.push(() => line.setMap(null));
-	}
+	drawRoute(segments, ROUTE_COLORS[0]);
 	stops.forEach((stop, index) =>
-		addMarker(position(stop), "Stop", { text: String(index + 1), html: stopHtml(stop, index), zIndex: 20 })
+		addMarker(position(stop), "Stop", {
+			content: pinElement(String(index + 1), stopColor(index, stops.length)),
+			title: `Stop ${index + 1}`,
+			html: stopHtml(stop, index),
+			zIndex: 20,
+		})
 	);
 	const located = events.filter((event) => event.latitude !== null);
 	for (const event of located) {
@@ -310,12 +387,44 @@ function clearMap() {
 	infoWindow?.close();
 }
 
-function addMarker(at, kind, { lastKnown = false, text = "", html = "", zIndex = 1 } = {}) {
+// A line for each stretch of readings, with arrows in the direction of travel
+function drawRoute(segments, color) {
+	const arrow = {
+		path: (maps.SymbolPath || google.maps.SymbolPath).FORWARD_CLOSED_ARROW,
+		scale: 3,
+		strokeColor: "#ffffff",
+		strokeWeight: 1,
+		fillColor: color,
+		fillOpacity: 1,
+	};
+	for (const segment of segments) {
+		const line = new maps.Polyline({
+			map,
+			path: segment.map(position),
+			strokeColor: color,
+			strokeOpacity: 0.85,
+			strokeWeight: 4,
+			icons: [{ icon: arrow, offset: "60px", repeat: "140px" }],
+		});
+		overlays.push(() => line.setMap(null));
+	}
+}
+
+function stopColor(index, count) {
+	if (index === 0) return STOP_COLORS.first;
+	return index === count - 1 ? STOP_COLORS.last : STOP_COLORS.middle;
+}
+
+function addMarker(
+	at,
+	kind,
+	{ lastKnown = false, text = "", html = "", zIndex = 1, content = null, title = kind } = {}
+) {
 	const marker = new maps.AdvancedMarkerElement({
 		map,
 		position: at,
-		content: markerElement(kind, { lastKnown, text }),
-		title: kind,
+		content: content || markerElement(kind, { lastKnown, text }),
+		title,
 		zIndex,
 		gmpClickable: Boolean(html),
 	});
@@ -350,6 +459,21 @@ function fit(points) {
 
 function position(item) {
 	return { lat: item.lat ?? item.latitude, lng: item.lng ?? item.longitude };
+}
+
+function routePoints(route) {
+	return route.segments.flat().map(position);
+}
+
+function initials(name) {
+	const words = String(name).split("@")[0].split(/\s+/).filter(Boolean);
+	return words.slice(0, 2).map((word) => word[0].toUpperCase()).join("") || "?";
+}
+
+function lastReadingHtml(route, point) {
+	return `<div style="font-size:13px;line-height:1.5"><strong>${escapeHtml(
+		route.agent_name || route.agent
+	)}</strong><br>Last reading ${formatDateTime(point.t)}</div>`;
 }
 
 function agentName(user) {

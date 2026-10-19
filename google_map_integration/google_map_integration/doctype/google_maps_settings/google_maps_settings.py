@@ -11,19 +11,10 @@ from google_map_integration.tracking.config import MAX_INTERVAL, MIN_INTERVAL, g
 
 class GoogleMapsSettings(Document):
 	def validate(self):
-		self.validate_map_defaults()
 		self.validate_tracking()
 		self.validate_stop_detection()
 		self.validate_retention()
 		self.update_notice_version()
-
-	def validate_map_defaults(self):
-		if not 0 <= cint(self.default_zoom) <= 22:
-			frappe.throw(_("Default Zoom must be between 0 and 22."))
-		if not -90 <= flt(self.default_latitude) <= 90:
-			frappe.throw(_("Default Latitude must be between -90 and 90."))
-		if not -180 <= flt(self.default_longitude) <= 180:
-			frappe.throw(_("Default Longitude must be between -180 and 180."))
 
 	def validate_tracking(self):
 		interval = cint(self.location_tracking_interval)

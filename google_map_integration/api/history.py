@@ -47,5 +47,10 @@ def get_tracking_days(agent: str, from_date: str, to_date: str) -> list:
 
 
 @frappe.whitelist(methods=["GET"])
+def get_team_routes(date: str, team: str | None = None, agent: str | None = None) -> list:
+	return history.get_team_routes(frappe.session.user, date, team=team, agent=agent)
+
+
+@frappe.whitelist(methods=["GET"])
 def get_day_summary(daily_tracking: int) -> dict:
 	return history.get_day_summary(frappe.session.user, daily_tracking)

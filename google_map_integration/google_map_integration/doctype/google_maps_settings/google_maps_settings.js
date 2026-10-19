@@ -41,17 +41,11 @@ async function show_preview(options) {
 	try {
 		await load_google_maps(options.api_key);
 		const { Map } = await google.maps.importLibrary("maps");
-		const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-		const center = options.default_center || WORLD_VIEW.center;
-		const map = new Map(container[0], {
-			center,
-			zoom: options.default_center ? options.default_zoom : WORLD_VIEW.zoom,
+		new Map(container[0], {
+			...WORLD_VIEW,
 			mapId: options.map_id,
 			mapTypeId: options.map_type,
 		});
-		if (options.default_center) {
-			new AdvancedMarkerElement({ map, position: center, title: __("Default location") });
-		}
 	} catch (error) {
 		show_map_error(error.message);
 	}
